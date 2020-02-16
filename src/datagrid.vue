@@ -27,6 +27,7 @@ export interface Column {
   label: string;
   data: string;
   right?: boolean;
+  sortable?: boolean;
 };
 
 export default {
@@ -65,6 +66,8 @@ export default {
       sort,
 
       sortOn(column: Column, multi: boolean) {
+        if (column.sortable === false) return;
+        
         let i = sort.findIndex(x => x.column === column);        
         let asc = i >= 0 ? sort[i].asc : undefined;
         if (!multi)
