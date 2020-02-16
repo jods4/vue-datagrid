@@ -67,16 +67,16 @@ export default {
 
       sortOn(column: Column, multi: boolean) {
         if (column.sortable === false) return;
-        
+
         let i = sort.findIndex(x => x.column === column);        
-        let asc = i >= 0 ? sort[i].asc : undefined;
+        let asc = i >= 0 ? sort[i].asc : 0;
         if (!multi)
           sort.length = 0;
-        else if (asc !== undefined)
+        else if (asc !== 0)
           sort.splice(i, 1);
-        asc = asc === undefined ? 1 :
-              asc ? -1 : undefined;
-        if (asc !== undefined)
+        asc = asc === 0 ? 1 :
+              asc > 0 ? -1 : 0;
+        if (asc !== 0)
           sort.push({ column, asc });
       }
     };
