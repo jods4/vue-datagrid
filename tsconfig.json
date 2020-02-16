@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": [ "ESNext", "DOM", "DOM.Iterable" ],
+    "importHelpers": true,
+    "skipLibCheck": true,
+    "stripInternal": true,
+
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": true
+  },
+
+  "include": ["demo/**/*.ts", "src/**/*.ts"]
+}
