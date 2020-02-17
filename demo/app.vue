@@ -1,9 +1,13 @@
 <template>
-  <h2>Pokedex</h2>
-  <ui-datagrid :data='data' :columns='columns' />
+<h2>
+  Pokedex
+  <button @click='loading = !loading'>Loading</button>
+</h2>
+<ui-datagrid :data='data' :columns='columns' :loading='loading' />
 </template>
 
 <script lang="ts">
+import { ref } from "vue";
 import data from './pokedex';
 
 export default {
@@ -16,7 +20,9 @@ export default {
         { label: 'Weight', data: 'weight', right: true, sortable: false },
         { label: 'Spawn chance', data: 'spawn_chance', right: true },
       ],
-      data
+      data,
+
+      loading: ref(false),
     };
   }
 }

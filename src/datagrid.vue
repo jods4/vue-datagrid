@@ -1,14 +1,20 @@
 <template>
+<div style='position: relative; overflow: hidden'>
   <table class='dg'>
     <thead>
-      <th v-for='(c, i) of columns' 
-          :key='i'
-          class='dg-header' :class='{ "dg-right": c.right, "dg-sort": c.sortable !== false }'
-          @click='sortOn(c, $event.ctrlKey)'>
-        {{ c.label }}
-        <sort-indicator :sort='sort' :column='c' />
-      </th>
-      <th class='dg-header dg-fill' />
+      <tr>
+        <th v-for='(c, i) of columns' 
+            :key='i'
+            class='dg-header' :class='{ "dg-right": c.right, "dg-sort": c.sortable !== false }'
+            @click='sortOn(c, $event.ctrlKey)'>
+          {{ c.label }}
+          <sort-indicator :sort='sort' :column='c' />
+        </th>
+        <th class='dg-header dg-fill' />
+      </tr>
+      <tr v-if='loading'>
+        <th class='dg-loader' :colspan="columns.length + 1"></th>
+      </tr>
     </thead>
     <tbody>
       <tr v-for='d of data' class='dg-row'>
@@ -17,10 +23,11 @@
       </tr>      
     </tbody>
   </table>
+</div>
 </template>
 
 <script lang="ts">
-import { markNonReactive } from 'vue';
+import { markNonReactive, toRefs } from 'vue';
 import { Column } from "./column";
 import SortIndicator from './sort-indicator';
 import { useSorting } from "./sorting";
@@ -33,13 +40,17 @@ export default {
   props: {
     columns: Array,
     data: Array,
+    loading: Boolean,
   },
 
-  setup(props: { columns?: Column[], data?: object[] }) {
+  setup(props: { columns?: Column[], data?: object[], loading?: boolean }) {
     for (let c of props.columns!) markNonReactive(c); // HACK: temporary until alpha.5 
+
+    const { loading } = toRefs(props);
 
     return {
       columns: props.columns,
+      loading,
       ...useSorting(props.data!),
     };
   }
@@ -54,13 +65,14 @@ export default {
   table-layout: fixed;
   empty-cells: show;
   overflow: auto;
+  max-height: 100%;
 }
 .dg-header, .dg-cell {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .dg-header {
-  padding: 4px 10px;
+  padding: 4px 12px;
   background: #f5f7f7;
   color: rgba(0, 0, 0, 0.55);
   font-weight: 600;  
@@ -79,8 +91,8 @@ export default {
 .dg-fill {
   width: 100%;
 }
-.dg-header:not(:last-child):after {
-  content: ' ';
+.dg-header:not(:last-child)::after {
+  content: '';
   position: absolute;
   right: 0;
   top: 5px;
@@ -88,7 +100,7 @@ export default {
   border-right: solid 1px #d9e0e4;
 }
 .dg-cell {
-  padding: 2px 10px;
+  padding: 2px 12px;
   border-bottom: solid 1px #d9e0e4;  
 }
 .dg-right {
@@ -108,5 +120,26 @@ export default {
   fill: currentColor;
   height: .83em;
   width: .83em;
+}
+
+@keyframes dg-loader {
+  50% { background-size: 80%; }
+  100% { background-position: 125% 0; }
+}
+.dg-loader {
+  height: 0; 
+  padding: 0;
+}
+.dg-loader::after
+{
+  content: '';
+  position: absolute; 
+  background: linear-gradient(to right, #64bff0, #64bff0) repeat-y; 
+  height: 2px;
+  width: 100%;
+  left: 0;
+  background-position: -25% 0; 
+  background-size: 20%; 
+  animation: dg-loader 1.5s ease-in-out infinite;
 }
 </style>
