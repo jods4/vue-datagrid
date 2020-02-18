@@ -3,7 +3,7 @@
   Pokedex
   <button @click='loading = !loading'>Loading</button>
 </h2>
-<ui-datagrid :data='data' :columns='columns' :loading='loading' />
+<ui-datagrid :data='data' :columns='columns' :loading='loading' style='flex: 1' />
 </template>
 
 <script lang="ts">

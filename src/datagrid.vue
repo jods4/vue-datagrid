@@ -1,6 +1,6 @@
 <template>
 <div style='position: relative; overflow: hidden'>
-  <table class='dg'>
+  <table class='dg' ref='table' @scroll.passive='onScroll'>
     <thead>
       <tr>
         <th v-for='(c, i) of columns' 
@@ -12,22 +12,24 @@
         </th>
         <th class='dg-header dg-fill' />
       </tr>
-      <tr v-if='loading'>
-        <th class='dg-loader' :colspan="columns.length + 1"></th>
-      </tr>
+      <tr v-if='loading' class='dg-loader'></tr>
+      <tr :style='{ height: virtualTop + "px" }'></tr>
     </thead>
     <tbody>
-      <tr v-for='d of data' class='dg-row'>
+      <tr v-for='d of data' class='dg-row' :key='d.id'>
         <td v-for='c of columns' v-text='d[c.data]' class='dg-cell' :class='c.right && "dg-right"' />
         <td class='dg-cell dg-fill' />
-      </tr>      
+      </tr>
     </tbody>
+    <tfoot>
+      <tr :style='{ height: virtualBottom + "px" }'></tr>
+    </tfoot>
   </table>
 </div>
 </template>
 
 <script lang="ts">
-import { markNonReactive, toRefs } from 'vue';
+import { computed, markNonReactive, onMounted, ref, toRefs } from 'vue';
 import { Column } from "./column";
 import SortIndicator from './sort-indicator';
 import { useSorting } from "./sorting";
@@ -47,11 +49,39 @@ export default {
     for (let c of props.columns!) markNonReactive(c); // HACK: temporary until alpha.5 
 
     const { loading } = toRefs(props);
+    const sorting = useSorting(props.data!);
+    
+    const table = ref<HTMLTableElement>(<any>null);
+    const height = ref(0);
+    onMounted(() => height.value = table.value.clientHeight - table.value.tHead!.clientHeight);
+    // TODO: resizing
+    const scrollTop = ref(0);
+    function onScroll() {
+      scrollTop.value = table.value.scrollTop;      
+    }
+    const virtualTop = ref(0);
+    const virtualBottom = ref(0);    
+    const data = computed(() => {
+      let all = sorting.data.value;
+      let from = scrollTop.value / 24 | 0;
+      let top = virtualTop.value = from * 24;
+      let length = height.value / 24 | 0 + 1;
+      virtualBottom.value = (all.length - length) * 24 - top;
+      return all.slice(from, from + length);
+    });
 
     return {
       columns: props.columns,
       loading,
-      ...useSorting(props.data!),
+      ...sorting,
+      data,
+
+      table,
+      height,
+      scrollTop,
+      onScroll,
+      virtualTop,
+      virtualBottom,
     };
   }
 };
@@ -65,7 +95,7 @@ export default {
   table-layout: fixed;
   empty-cells: show;
   overflow: auto;
-  max-height: 100%;
+  height: 100%;
 }
 .dg-header, .dg-cell {
   white-space: nowrap;
@@ -128,7 +158,6 @@ export default {
 }
 .dg-loader {
   height: 0; 
-  padding: 0;
 }
 .dg-loader::after
 {
