@@ -1,6 +1,6 @@
 <template>
 <div style='position: relative; overflow: hidden'>
-  <table class='dg' ref='table' @scroll.passive='onScroll'>
+  <table class='dg' v-virtual='virtual'>
     <thead>
       <tr>
         <th v-for='(c, i) of columns' 
@@ -13,30 +13,33 @@
         <th class='dg-header dg-fill' />
       </tr>
       <tr v-if='loading' class='dg-loader'></tr>
-      <tr :style='{ height: virtualTop + "px" }'></tr>
     </thead>
     <tbody>
-      <tr v-for='d of data' class='dg-row' :key='d.id'>
+      <tr :style='{ height: virtual.topGap + "px" }'></tr>
+      <tr v-for='d of virtual' class='dg-row' :key='d.id'>
         <td v-for='c of columns' v-text='d[c.data]' class='dg-cell' :class='c.right && "dg-right"' />
         <td class='dg-cell dg-fill' />
       </tr>
+      <tr :style='{ height: virtual.bottomGap + "px" }'></tr>
     </tbody>
-    <tfoot>
-      <tr :style='{ height: virtualBottom + "px" }'></tr>
-    </tfoot>
   </table>
 </div>
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref, toRefs } from 'vue';
+import { toRefs } from 'vue';
 import { Column } from "./column";
 import SortIndicator from './sort-indicator';
 import { useSorting } from "./sorting";
+import { useVirtual, VirtualTable } from "./virtual";
 
 export default {
   components: {
     'sort-indicator': SortIndicator,
+  },
+
+  directives: {
+    'virtual': VirtualTable,
   },
 
   props: {
@@ -48,38 +51,13 @@ export default {
   setup(props: { columns?: Column[], data?: object[], loading?: boolean }) {
     const { loading } = toRefs(props);
     const sorting = useSorting(props.data!);
+    const virtual = useVirtual(sorting.data);
     
-    const table = ref<HTMLTableElement>(<any>null);
-    const height = ref(0);
-    onMounted(() => height.value = table.value.clientHeight - table.value.tHead!.clientHeight);
-    // TODO: resizing
-    const scrollTop = ref(0);
-    function onScroll() {
-      scrollTop.value = table.value.scrollTop;      
-    }
-    const virtualTop = ref(0);
-    const virtualBottom = ref(0);    
-    const data = computed(() => {
-      let all = sorting.data.value;
-      let from = scrollTop.value / 24 | 0;
-      let top = virtualTop.value = from * 24;
-      let length = height.value / 24 | 0 + 1;
-      virtualBottom.value = (all.length - length) * 24 - top;
-      return all.slice(from, from + length);
-    });
-
     return {
       columns: props.columns,
       loading,
       ...sorting,
-      data,
-
-      table,
-      height,
-      scrollTop,
-      onScroll,
-      virtualTop,
-      virtualBottom,
+      virtual,
     };
   }
 };
