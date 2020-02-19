@@ -1,18 +1,18 @@
 <template>
 <h2>
   Pokedex
-  <button @click='loading = !loading'>Loading</button>
+  <button @click='fetch'>Load data (for 3s)</button>
 </h2>
-<ui-datagrid :data='data' :columns='columns' :loading='loading' style='flex: 1' />
+<ui-datagrid :data='data' :columns='columns' style='flex: 1' />
 </template>
 
 <script lang="ts">
-import { ref } from "vue";
+import { markNonReactive, ref } from "vue";
 import data from './pokedex';
 
 export default {
   setup() {
-    return {
+    const state = {
       columns: [ 
         { label: 'Id', data: 'id' },
         { label: 'Name', data: 'name' },
@@ -20,10 +20,18 @@ export default {
         { label: 'Weight', data: 'weight', right: true, sortable: false },
         { label: 'Spawn chance', data: 'spawn_chance', right: true },
       ],
-      data,
+      data: ref<any>([]),
 
-      loading: ref(false),
+      fetch() {
+        state.data.value = new Promise(resolve => { 
+          setTimeout(() => resolve(markNonReactive([...data])), 3000);
+        });
+      }
     };
+
+    state.fetch();
+
+    return state;
   }
 }
 </script>

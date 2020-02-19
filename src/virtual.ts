@@ -9,6 +9,8 @@ interface VirtualState {
   bottomGap: number;
   index: number;
   count: number;
+
+  scrollToTop: Function;
 }
 
 export function useVirtual(data: Ref<object[]>) {
@@ -21,6 +23,8 @@ export function useVirtual(data: Ref<object[]>) {
     bottomGap: 0,
     index: 0,
     count: 0,
+
+    scrollToTop: null!, // initialized on mount
 
     [Symbol.iterator]: function*() {
       const all = data.value;
@@ -58,6 +62,7 @@ function onScroll(ev: Event) {
 
 export const VirtualTable: ObjectDirective<VirtualHTMLTable> = {
   beforeMount(el, binding) {
+    binding.value.scrollToTop = () => el.scrollTop = 0;
     el._vscroll = binding.value;
     resizeObserver.observe(el);
     el.addEventListener('scroll', onScroll, { passive: true });

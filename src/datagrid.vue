@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { toRefs } from 'vue';
+import { ref, watch } from 'vue';
 import { Column } from "./column";
 import SortIndicator from './sort-indicator';
 import { useSorting } from "./sorting";
@@ -44,15 +44,22 @@ export default {
 
   props: {
     columns: Array,
-    data: Array,
-    loading: Boolean,
+    data: [Array, Promise],
   },
 
-  setup(props: { columns?: Column[], data?: object[], loading?: boolean }) {
-    const { loading } = toRefs(props);
-    const sorting = useSorting(props.data!);
+  setup(props: { columns?: Column[], data?: object[] | Promise<object[]> }) {
+    const loading = ref(true);
+    const data = ref([] as object[]);
+    const sorting = useSorting(data);
     const virtual = useVirtual(sorting.data);
     
+    watch(async () => {
+      loading.value = true;
+      data.value = await props.data!;
+      loading.value = false;
+      virtual.scrollToTop();
+    });
+
     return {
       columns: props.columns,
       loading,

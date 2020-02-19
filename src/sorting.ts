@@ -1,14 +1,14 @@
-import { computed, shallowReactive } from "vue";
+import { computed, Ref, shallowReactive } from "vue";
 import { Column } from "./column";
 
-export function useSorting(data: object[]) {
+export function useSorting(data: Ref<object[]>) {
   const sort = shallowReactive([] as { column: Column, asc: number }[]);
 
   return {
     sort, 
 
     data: computed(() => {
-      if (sort.length === 0) return data;
+      if (sort.length === 0) return data.value;
 
       const comparer = (a: object, b: object) =>  {
         for (let s of sort) {
@@ -19,7 +19,7 @@ export function useSorting(data: object[]) {
         }
         return 0;
       };
-      return Array.from(data).sort(comparer);
+      return Array.from(data.value).sort(comparer);
     }),
 
     sortOn(column: Column, multi: boolean) {
