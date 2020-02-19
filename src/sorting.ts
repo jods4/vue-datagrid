@@ -1,8 +1,8 @@
-import { computed, reactive } from "vue";
+import { computed, shallowReactive } from "vue";
 import { Column } from "./column";
 
 export function useSorting(data: object[]) {
-  const sort = reactive([] as { column: Column, asc: number }[]);
+  const sort = shallowReactive([] as { column: Column, asc: number }[]);
 
   return {
     sort, 

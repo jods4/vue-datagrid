@@ -2,10 +2,10 @@
   "name": "vue-datagrid",
   "version": "0.1.0",
   "dependencies": {
-    "vue": "^3.0.0-alpha.4"
+    "vue": "^3.0.0-alpha.5"
   },
   "devDependencies": {
-    "@vue/compiler-sfc": "^3.0.0-alpha.4",
+    "@vue/compiler-sfc": "^3.0.0-alpha.5",
     "css-loader": "^3.4.2",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.1-rc",

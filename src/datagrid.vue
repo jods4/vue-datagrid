@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { computed, markNonReactive, onMounted, ref, toRefs } from 'vue';
+import { computed, onMounted, ref, toRefs } from 'vue';
 import { Column } from "./column";
 import SortIndicator from './sort-indicator';
 import { useSorting } from "./sorting";
@@ -46,8 +46,6 @@ export default {
   },
 
   setup(props: { columns?: Column[], data?: object[], loading?: boolean }) {
-    for (let c of props.columns!) markNonReactive(c); // HACK: temporary until alpha.5 
-
     const { loading } = toRefs(props);
     const sorting = useSorting(props.data!);
     
