@@ -1,8 +1,13 @@
 <template>
 <div style='position: relative; overflow: hidden'>
-  <table class='dg' v-virtual='virtual'>
+  <table class='dg' :class='selected && "dg-selectable"'
+         v-virtual='virtual'>
     <thead>
       <tr>
+        <th v-if='selected' class='dg-header'>
+          <!-- FIXME: v-model='allSelected' when alpha.6 is published -->
+          <input type='checkbox' :checked='allSelected' @change='allSelected = $event.target.checked' :indeterminate='allSelected === 1' />
+        </th>
         <th v-for='(c, i) of columns' 
             :key='i'
             class='dg-header' :class='{ "dg-right": c.right, "dg-sort": c.sortable !== false }'
@@ -14,9 +19,14 @@
       </tr>
       <tr v-if='loading' class='dg-loader'></tr>
     </thead>
-    <tbody>
+    <tbody @click='toggle($event.target)'>
       <tr :style='{ height: virtual.topGap + "px" }'></tr>
-      <tr v-for='d of virtual' class='dg-row' :key='d.id'>
+      <tr v-for='d of virtual' :key='d.id'
+          class='dg-row' :class='selected && selected.has(d) && "dg-selected"'
+          :true-value='d'>
+        <td v-if='selected' class='dg-cell'>
+          <input type='checkbox' :checked='selected.has(d)' />
+        </td>
         <td v-for='c of columns' v-text='d[c.data]' class='dg-cell' :class='c.right && "dg-right"' />
         <td class='dg-cell dg-fill' />
       </tr>
@@ -29,6 +39,7 @@
 <script lang="ts">
 import { ref, watch } from 'vue';
 import { Column } from "./column";
+import { useSelection } from "./selection";
 import SortIndicator from './sort-indicator';
 import { useSorting } from "./sorting";
 import { useVirtual, VirtualTable } from "./virtual";
@@ -45,11 +56,13 @@ export default {
   props: {
     columns: Array,
     data: [Array, Promise],
+    selected: Set,
   },
 
-  setup(props: { columns?: Column[], data?: object[] | Promise<object[]> }) {
+  setup(props: { columns?: Column[], data?: object[] | Promise<object[]>, selected?: Set<object> }) {
     const loading = ref(true);
     const data = ref([] as object[]);
+    const selection = useSelection(data, props.selected);
     const sorting = useSorting(data);
     const virtual = useVirtual(sorting.data);
     
@@ -60,9 +73,11 @@ export default {
       virtual.scrollToTop();
     });
 
-    return {
+    return {      
       columns: props.columns,
-      loading,
+      loading,      
+      selected: props.selected,
+      ...selection,
       ...sorting,
       virtual,
     };

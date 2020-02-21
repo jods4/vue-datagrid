@@ -1,13 +1,17 @@
 <template>
-<h2>
-  Pokedex
-  <button @click='fetch'>Load data (for 3s)</button>
-</h2>
-<ui-datagrid :data='data' :columns='columns' style='flex: 1' />
+<h2 style='margin: 0'>Pokedex</h2>
+<div style='margin: 12px 0'>
+  <button @click='fetch'>Load data (for 2s)</button>
+  Selected count: {{ selected.size }}
+  <button @click='selected.clear()'>Clear selection</button>
+</div>
+<ui-datagrid :data='data' :columns='columns' 
+             :selected='selected'
+             style='flex: 1' />
 </template>
 
 <script lang="ts">
-import { markNonReactive, ref } from "vue";
+import { markNonReactive, ref, shallowReactive } from "vue";
 import data from './pokedex';
 
 export default {
@@ -24,9 +28,11 @@ export default {
 
       fetch() {
         state.data.value = new Promise(resolve => { 
-          setTimeout(() => resolve(markNonReactive([...data])), 3000);
+          setTimeout(() => resolve(markNonReactive([...data])), 2000);
         });
-      }
+      },
+
+      selected: shallowReactive(new Set()),
     };
 
     state.fetch();

@@ -60,7 +60,7 @@
 }
 
 .dg-row:hover {
-  background: #e0f4ff;
+  background: #e0f4ff !important;
 }
 
 .dg-sort-count {
@@ -72,6 +72,14 @@
   fill: currentColor;
   height: .83em;
   width: .83em;
+}
+
+.dg-selectable .dg-row {
+  cursor: pointer;
+}
+
+.dg-row.dg-selected {
+  background: #daf1ff;
 }
 
 @keyframes dg-loader {
