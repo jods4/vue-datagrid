@@ -1,11 +1,18 @@
-.dg {
+.dg-wrapper {
   border: 1px solid #bdc3c7;
+  position: relative; 
+  overflow: hidden
+}
+
+.dg-scroller {
+  overflow: auto; 
+  height: 100%
+}
+
+.dg {  
   border-spacing: 0;
-  display: block;
   table-layout: fixed;
-  empty-cells: show;
-  overflow: auto;
-  height: 100%;
+  empty-cells: show;  
 }
 
 .dg-header, .dg-cell {

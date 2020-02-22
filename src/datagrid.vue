@@ -1,38 +1,41 @@
 <template>
-<div style='position: relative; overflow: hidden'>
-  <table class='dg' :class='selected && "dg-selectable"'
-         v-virtual='virtual'>
-    <thead>
-      <tr>
-        <th v-if='selected' class='dg-header'>
-          <!-- FIXME: v-model='allSelected' when alpha.6 is published -->
-          <input type='checkbox' :checked='allSelected' @change='allSelected = $event.target.checked' :indeterminate='allSelected === 1' />
-        </th>
-        <th v-for='(c, i) of columns' 
-            :key='i'
-            class='dg-header' :class='{ "dg-right": c.right, "dg-sort": c.sortable !== false }'
-            @click='sortOn(c, $event.ctrlKey)'>
-          {{ c.label }}
-          <sort-indicator :sort='sort' :column='c' />
-        </th>
-        <th class='dg-header dg-fill' />
-      </tr>
-      <tr v-if='loading' class='dg-loader'></tr>
-    </thead>
-    <tbody @click='toggle($event.target)'>
-      <tr :style='{ height: virtual.topGap + "px" }'></tr>
-      <tr v-for='d of virtual' :key='d.id'
-          class='dg-row' :class='selected && selected.has(d) && "dg-selected"'
-          :true-value='d'>
-        <td v-if='selected' class='dg-cell'>
-          <input type='checkbox' :checked='selected.has(d)' />
-        </td>
-        <td v-for='c of columns' v-text='d[c.data]' class='dg-cell' :class='c.right && "dg-right"' />
-        <td class='dg-cell dg-fill' />
-      </tr>
-      <tr :style='{ height: virtual.bottomGap + "px" }'></tr>
-    </tbody>
-  </table>
+<div class='dg-wrapper'>
+  <div class='dg-scroller'>
+    <table class='dg' :class='selected && "dg-selectable"'
+          v-virtual='virtual'>
+      <thead>
+        <tr>
+          <th v-if='selected' class='dg-header'>
+            <!-- FIXME: v-model='allSelected' when alpha.6 is published -->
+            <input type='checkbox' :checked='allSelected' @change='allSelected = $event.target.checked' :indeterminate='allSelected === 1' />
+          </th>
+          <th v-for='(c, i) of columns' 
+              :key='i'
+              class='dg-header' :class='{ "dg-right": c.right, "dg-sort": c.sortable !== false }'
+              :style='{ width: c.width }'
+              @click='sortOn(c, $event.ctrlKey)'>
+            {{ c.label }}
+            <sort-indicator :sort='sort' :column='c' />
+          </th>
+          <th class='dg-header dg-fill' />
+        </tr>
+        <tr v-if='loading' class='dg-loader'></tr>
+      </thead>
+      <tbody @click='toggle($event.target)'>
+        <tr :style='{ height: virtual.topGap + "px" }'></tr>
+        <tr v-for='d of virtual' :key='d.id'
+            class='dg-row' :class='selected && selected.has(d) && "dg-selected"'
+            :true-value='d'>
+          <td v-if='selected' class='dg-cell'>
+            <input type='checkbox' :checked='selected.has(d)' />
+          </td>
+          <td v-for='c of columns' v-text='d[c.data]' class='dg-cell' :class='c.right && "dg-right"' />
+          <td class='dg-cell dg-fill' />
+        </tr>
+        <tr :style='{ height: virtual.bottomGap + "px" }'></tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 </template>
 
