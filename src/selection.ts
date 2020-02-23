@@ -1,4 +1,4 @@
-import { computed, Ref, watch } from "vue";
+import { computed, Ref, watch, ObjectDirective } from "vue";
 
 export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
   if (!selected) return null;
@@ -8,7 +8,7 @@ export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
 
   return {
     toggle(el: HTMLElement) {
-      let item: object | undefined = el.closest('.dg-row')?.['_trueValue'];
+      let item: object | undefined = el.closest('.dg-row')?.['_item'];
       if (!item) return;
       if (!selected.delete(item))
         selected.add(item);      
@@ -28,3 +28,9 @@ export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
     })
   };
 }
+
+export const ItemDirective: ObjectDirective<HTMLElement> = {
+  mounted(el, binding) {
+    el['_item'] = binding.value; 
+  }
+};
