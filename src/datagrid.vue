@@ -6,8 +6,7 @@
       <thead>
         <tr>
           <th v-if='selected' class='dg-header'>
-            <!-- FIXME: v-model='allSelected' when alpha.6 is published -->
-            <input type='checkbox' :checked='allSelected' @change='allSelected = $event.target.checked' :indeterminate='allSelected === 1' />
+            <input type='checkbox' v-model='allSelected' :indeterminate='allSelected == null' />
           </th>
           <th v-for='(c, i) of columns' 
               :key='i'
@@ -40,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { shallowRef as sref, watch } from 'vue';
 import { Column } from "./column";
 import { useSelection } from "./selection";
 import SortIndicator from './sort-indicator';
@@ -63,8 +62,8 @@ export default {
   },
 
   setup(props: { columns?: Column[], data?: object[] | Promise<object[]>, selected?: Set<object> }) {
-    const loading = ref(true);
-    const data = ref([] as object[]);
+    const loading = sref(true);
+    const data = sref([] as object[]);
     const selection = useSelection(data, props.selected);
     const sorting = useSorting(data);
     const virtual = useVirtual(sorting.data);

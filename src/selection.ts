@@ -17,9 +17,9 @@ export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
     allSelected: computed({ 
       get() {
         return selected.size === 0 ? false :
-          selected.size === data.value.length ? true : 1; // 1 is purposefully truthy (null or undefined is not)
+          selected.size === data.value.length ? true : null;
       }, 
-      set(value: boolean | 1) {
+      set(value: boolean | null) {
         if (value)
           data.value.forEach(selected.add, selected);
         else

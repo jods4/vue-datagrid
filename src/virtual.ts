@@ -38,7 +38,7 @@ export function useVirtual(data: Ref<object[]>) {
     const length = data.value.length;
     const { buffer, height, rowHeight, scrollTop } = state;
     const index = state.index = Math.max((scrollTop / rowHeight | 0) - buffer, 0);
-    const count = state.count = Math.min((height / rowHeight | 0) + 1 + buffer + buffer, data.value.length - index);
+    const count = state.count = Math.min((height / rowHeight | 0) + 1 + buffer + buffer, length - index);
     state.topGap = index * rowHeight;
     state.bottomGap = (length - count - index) * rowHeight;
   });
