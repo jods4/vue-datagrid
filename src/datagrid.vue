@@ -1,8 +1,7 @@
 <template>
 <div class='dg-wrapper'>
-  <div class='dg-scroller'>
-    <table class='dg' :class='selected && "dg-selectable"'
-          v-virtual='virtual'>
+  <div class='dg-scroller' v-virtual='virtual'>
+    <table class='dg' :class='selected && "dg-selectable"'>
       <thead>
         <tr>
           <th v-if='selected' class='dg-header'>

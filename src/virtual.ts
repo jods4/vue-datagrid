@@ -51,7 +51,7 @@ type VirtualHTMLTable = HTMLTableElement & { _vscroll: VirtualState };
 const resizeObserver = new ResizeObserver(entries => {
   for (let entry of entries) {
     let table = entry.target as VirtualHTMLTable;
-    table._vscroll.height = entry.contentRect.height - table.tHead!.clientHeight;
+    table._vscroll.height = entry.contentRect.height - table.querySelector('tHead')!.clientHeight;
   }
 });
 
