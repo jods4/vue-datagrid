@@ -13,10 +13,12 @@
   border-spacing: 0;
   table-layout: fixed;
   empty-cells: show;  
+  /*width: 100%;*/
 }
 
 .dg-header, .dg-cell {
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
@@ -41,7 +43,7 @@
 }
 
 .dg-fill {
-  width: 100%;
+  /*width: 100%;*/
 }
 
 .dg-header:not(:last-child)::after {

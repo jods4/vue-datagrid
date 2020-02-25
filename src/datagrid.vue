@@ -1,32 +1,26 @@
 <template>
 <div class='dg-wrapper'>
-  <virt-scroller ref='scroller' class='dg-scroller'>
-    <table class='dg' :class='selected && "dg-selectable"'>
+  <virt-scroller class='dg-scroller'>
+    <table ref='table' class='dg' :class='selected && "dg-selectable"'>
       <thead>
         <tr>
-          <th v-if='selected' class='dg-header'>
-            <input type='checkbox' v-model='allSelected' :indeterminate='allSelected == null' />
-          </th>
           <th v-for='(c, i) of columns' 
               :key='i'
-              class='dg-header' :class='{ "dg-right": c.right, "dg-sort": c.sortable !== false }'
+              class='dg-header' :class='[c.css, { "dg-sort": c.sortable !== false }]'
               :style='{ width: c.width }'
               @click='sortOn(c, $event.ctrlKey)'>
             {{ c.label }}
             <sort-indicator :sort='sort' :column='c' />
           </th>
-          <th class='dg-header dg-fill' />
         </tr>
         <tr v-if='loading' class='dg-loader'></tr>
       </thead>
       <virt-body @click='toggle($event.target)' v-slot='{ items }'>
         <tr v-for='d of items()' :key='d.id' v-item='d'
             class='dg-row' :class='selected && selected.has(d) && "dg-selected"'>
-          <td v-if='selected' class='dg-cell'>
-            <input type='checkbox' :checked='selected.has(d)' />
+          <td v-for='(c,i) of columns' :key='i' class='dg-cell' :class='c.css'>
+            <component :is='c.render' :data='d' />
           </td>
-          <td v-for='c of columns' v-text='d[c.data]' class='dg-cell' :class='c.right && "dg-right"' />
-          <td class='dg-cell dg-fill' />
         </tr>
       </virt-body>
     </table>
@@ -35,11 +29,10 @@
 </template>
 
 <script lang="ts">
-import { shallowRef as sref, watch } from 'vue';
-import { Column } from "./column";
+import { shallowRef as sref, reactive, watch, h } from 'vue';
+import { Column } from "./columns/column";
 import { useSelection, ItemDirective } from "./selection";
-import SortIndicator from './sort-indicator';
-import { useSorting } from "./sorting";
+import { useSorting, SortIndicator } from "./sort/index";
 import { useVirtual, VirtualBody, VirtualScroller } from "./virtual/index";
 
 export default {
@@ -62,9 +55,19 @@ export default {
   setup(props: { columns?: Column[], data?: object[] | Promise<object[]>, selected?: Set<object> }) {
     const loading = sref(true);
     const data = sref([] as object[]);
+    const table = sref();
     const selection = useSelection(data, props.selected);
     const sorting = useSorting(data);
     const { scrollToTop } = useVirtual(sorting.data);
+    
+    const columns = reactive([...props.columns!.map(c => ({ render: (childProps: any) => childProps.data[c.data!] + "", ...c, defaultWidth: c.width })), 
+                              { css: 'dg-fill', sortable: false, render: () => '' }]);
+    if (props.selected)
+      columns.unshift({ 
+        sortable: false, 
+        defaultWidth: '',
+        render: (childProps: any) => h('input', { type: 'checkbox', checked: props.selected!.has(childProps.data) }) 
+      });
     
     watch(async () => {
       loading.value = true;
@@ -74,8 +77,9 @@ export default {
     });
 
     return {      
-      columns: props.columns,
-      loading,      
+      columns,
+      loading,
+      table,
       selected: props.selected,
       ...selection,
       ...sorting,

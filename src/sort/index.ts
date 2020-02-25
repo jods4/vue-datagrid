@@ -1,5 +1,7 @@
 import { computed, Ref, shallowReactive } from "vue";
-import { Column } from "./column";
+import { Column } from "../columns/column";
+
+export { default as SortIndicator } from "./sort-indicator";
 
 export function useSorting(data: Ref<object[]>) {
   const sort = shallowReactive([] as { column: Column, asc: number }[]);
@@ -12,7 +14,7 @@ export function useSorting(data: Ref<object[]>) {
 
       const comparer = (a: object, b: object) =>  {
         for (let s of sort) {
-          let d = s.column.data;
+          let d = s.column.data!;
           let da = a[d], db = b[d];
           if (da > db) return s.asc;
           if (da < db) return -s.asc;
