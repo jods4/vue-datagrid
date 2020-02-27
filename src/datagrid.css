@@ -43,13 +43,14 @@
   background: #e0e0e0;
 }
 
-.dg-header:not(:last-child)::after {
-  content: '';
+.dg-resizer {
   position: absolute;
   right: 0;
   top: 5px;
   height: calc(100% - 10px);
   border-right: solid 1px #d9e0e4;
+  padding-right: 4px;
+  cursor: col-resize;
 }
 
 .dg-cell {

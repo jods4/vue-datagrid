@@ -11,6 +11,7 @@
               @click='sortOn(c, $event.ctrlKey)'>
             {{ c.label }}
             <sort-indicator :sort='sort' :column='c' />
+            <b class='dg-resizer' @pointerdown="beginResize(c, $event)" @click.stop></b>
           </th>
         </tr>
         <tr v-if='loading' class='dg-loader'></tr>
@@ -92,11 +93,21 @@ export default {
         autoSize(table.value, columns as { width?: string }[]);
     }));
 
+    function beginResize(column: { width: string }, 
+                         { target, x: x0, pointerId }: PointerEvent & { target: HTMLElement }) {
+      const baseWidth = parseInt(column.width, 10);
+      const moveHandler = (event: PointerEvent) => column.width = Math.max(baseWidth + event.x - x0, 40) + "px";
+      target.setPointerCapture(pointerId)
+      target.addEventListener('pointermove', moveHandler);
+      target.addEventListener('pointerup', event => target.removeEventListener('pointermove', moveHandler), { once: true });
+    }
+
     return {      
       columns,
       loading,
       table,
       size,
+      beginResize,
       selected: props.selected,
       ...selection,
       ...sorting,
