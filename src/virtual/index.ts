@@ -1,4 +1,4 @@
-import { Ref, provide, shallowReactive, unref, watch } from "vue";
+import { Ref, provide, shallowReactive, unref, watchEffect } from "vue";
 import { injectKey, VirtualState } from './state';
 
 export { default as VirtualScroller } from './scroller.vue';
@@ -26,7 +26,7 @@ export function useVirtual(data: Val<object[]>) {
     },
   });
 
-  watch(() => {
+  watchEffect(() => {
     const length = unref(data).length;
     const { buffer, height, rowHeight, scrollTop } = state;
     const index = state.index = Math.max((scrollTop / rowHeight | 0) - buffer, 0);

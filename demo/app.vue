@@ -20,9 +20,9 @@ export default {
       columns: [ 
         { label: 'Id', data: 'id' },
         { label: 'Name', data: 'name' },
-        { label: 'Height', data: 'height', css: 'dg-right', sortable: false, width: '80px' },
-        { label: 'Weight', data: 'weight', css: 'dg-right', sortable: false, width: '80px' },
-        { label: 'Spawn chance', data: 'spawn_chance', right: true, width: '80px' },
+        { label: 'Height', data: 'height', css: 'dg-right', sortable: false, width: '100px' },
+        { label: 'Weight', data: 'weight', css: 'dg-right', sortable: false, width: '100px' },
+        { label: 'Spawn chance', data: 'spawn_chance', right: true, width: '100px' },
       ],
       data: ref<any>([]),
 

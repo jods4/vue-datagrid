@@ -1,7 +1,7 @@
 <template>
-<div class='dg-wrapper'>
+<div class='dg-wrapper'>  
   <virt-scroller class='dg-scroller'>
-    <table ref='table' class='dg' :class='selected && "dg-selectable"'>
+    <table ref='table' class='dg' :class='selected && "dg-selectable"' v-resize='size'>
       <thead>
         <tr>
           <th v-for='(c, i) of columns' 
@@ -29,8 +29,10 @@
 </template>
 
 <script lang="ts">
-import { shallowRef as sref, reactive, watch, h } from 'vue';
+import { h, reactive, shallowRef as sref, watchEffect, onMounted, shallowReactive } from 'vue';
 import { Column } from "./columns/column";
+import { autoSize } from "./columns/autosize";
+import ResizeDirective from "./resize";
 import { useSelection, ItemDirective } from "./selection";
 import { useSorting, SortIndicator } from "./sort/index";
 import { useVirtual, VirtualBody, VirtualScroller } from "./virtual/index";
@@ -44,6 +46,7 @@ export default {
 
   directives: {
     'item': ItemDirective,
+    'resize': ResizeDirective,
   },
 
   props: {
@@ -56,6 +59,7 @@ export default {
     const loading = sref(true);
     const data = sref([] as object[]);
     const table = sref();
+    const size = shallowReactive({ width: 0, height: 0});
     const selection = useSelection(data, props.selected);
     const sorting = useSorting(data);
     const { scrollToTop } = useVirtual(sorting.data);
@@ -68,18 +72,22 @@ export default {
         defaultWidth: '',
         render: (childProps: any) => h('input', { type: 'checkbox', checked: props.selected!.has(childProps.data) }) 
       });
+    let autosized = false;
     
-    watch(async () => {
+    onMounted(() => watchEffect(async () => {
       loading.value = true;
-      data.value = await props.data!;
+      let rawData = data.value = await props.data!;
       loading.value = false;
       scrollToTop();
-    });
+      if (!autosized && rawData.length > 0)
+        autoSize(table.value, columns as { width?: string }[]);
+    }));
 
     return {      
       columns,
       loading,
       table,
+      size,
       selected: props.selected,
       ...selection,
       ...sorting,
