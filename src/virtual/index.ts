@@ -6,10 +6,9 @@ export { default as VirtualBody } from './body.vue';
 
 type Val<T> = T | Ref<T>;
 
-export function useVirtual(data: Val<object[]>) {
+export function useVirtual(data: Val<object[]>, size: { height: number }) {
   const state: VirtualState = shallowReactive({
     scroller: <any>null!, // initialized on mount // FIXME: TS error if declared as Element?
-    height: 0,
     scrollTop: 0,
     rowHeight: 24,
     buffer: 4,
@@ -28,9 +27,9 @@ export function useVirtual(data: Val<object[]>) {
 
   watchEffect(() => {
     const length = unref(data).length;
-    const { buffer, height, rowHeight, scrollTop } = state;
+    const { buffer, rowHeight, scrollTop } = state;
     const index = state.index = Math.max((scrollTop / rowHeight | 0) - buffer, 0);
-    const count = state.count = Math.min((height / rowHeight | 0) + 1 + buffer + buffer, length - index);
+    const count = state.count = Math.min((size.height / rowHeight | 0) + 1 + buffer + buffer, length - index);
     state.topGap = index * rowHeight;
     state.bottomGap = (length - count - index) * rowHeight;
   });

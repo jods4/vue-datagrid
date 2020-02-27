@@ -1,7 +1,7 @@
 <template>
 <div class='dg-wrapper'>  
-  <virt-scroller class='dg-scroller'>
-    <table ref='table' class='dg' :class='selected && "dg-selectable"' v-resize='size'>
+  <virt-scroller class='dg-scroller' v-resize='size'>
+    <table ref='table' class='dg' :class='selected && "dg-selectable"'>
       <thead>
         <tr>
           <th v-for='(c, i) of columns' 
@@ -62,10 +62,11 @@ export default {
     const size = shallowReactive({ width: 0, height: 0});
     const selection = useSelection(data, props.selected);
     const sorting = useSorting(data);
-    const { scrollToTop } = useVirtual(sorting.data);
+    const { scrollToTop } = useVirtual(sorting.data, size);
     
+    const filler = reactive({ sortable: false, render: () => '', width: '' });
     const columns = reactive([...props.columns!.map(c => ({ render: (childProps: any) => childProps.data[c.data!] + "", ...c, defaultWidth: c.width })), 
-                              { css: 'dg-fill', sortable: false, render: () => '' }]);
+                              filler]);
     if (props.selected)
       columns.unshift({ 
         sortable: false, 
@@ -74,6 +75,14 @@ export default {
       });
     let autosized = false;
     
+    onMounted(() => watchEffect(() => {
+      const total = columns.reduce((sum, col) => {
+        const width = parseInt(col['width']!, 10);        
+        return isNaN(width) || col === filler ? sum : sum + width;
+      }, 0);
+      filler.width = (size.width - total) + "px";
+    }));
+
     onMounted(() => watchEffect(async () => {
       loading.value = true;
       let rawData = data.value = await props.data!;

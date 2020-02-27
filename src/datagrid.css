@@ -5,7 +5,7 @@
 }
 
 .dg-scroller {
-  overflow: auto; 
+  overflow: auto scroll;
   height: 100%
 }
 
@@ -41,10 +41,6 @@
 
 .dg-sort:active {
   background: #e0e0e0;
-}
-
-.dg-fill {
-  /*width: 100%;*/
 }
 
 .dg-header:not(:last-child)::after {
