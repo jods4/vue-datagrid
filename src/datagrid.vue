@@ -9,7 +9,7 @@
                 class='dg-header' :class='[c.css, { "dg-sort": c.sortable !== false }]'
                 :style='{ width: c.width }'
                 @click='sortOn(c, $event.ctrlKey)'>
-              {{ c.label }}
+              <component :is='c.header' />
               <sort-indicator :sort='sort' :column='c' />
               <col-resizer :column='c' />
             </th>
@@ -34,7 +34,7 @@ import { reactive, shallowRef as sref, watchEffect, onMounted, shallowReactive }
 import { addFiller, autoSize, Column, ColumnDefinition, ColResizer } from './columns';
 import { ItemDirective, getItem } from './item';
 import ResizeDirective from './resize';
-import { addSelection, useSelection } from './selection';
+import { addSelection } from './selection';
 import { useSorting, SortIndicator } from './sort';
 import { useVirtual, VirtualBody, VirtualScroller } from './virtual';
 
@@ -62,17 +62,17 @@ export default {
     const data = sref([] as object[]);
     const table = sref();
     const size = shallowReactive({ width: 0, height: 0});
-    const selection = useSelection(data, props.selected);
     const sorting = useSorting(data);
     const { scrollToTop } = useVirtual(sorting.data, size);
     
-    const columns: Column[] = reactive(props.columns!.map(c => ({ 
-      render: (childProps: any) => childProps.data[c.data!] + "", 
+    const columns: Column[] = reactive(props.columns!.map(c => ({
+      header: (childProps: any) => c.label + "",
+      render: (childProps: any) => childProps.data[c.data!] + "",      
       ...c, 
       defaultWidth: c.width 
     })));
 
-    addSelection(columns, props.selected);
+    const select = addSelection(columns, data, props.selected);
     addFiller(columns, size);
 
     let autosized = false;
@@ -90,7 +90,7 @@ export default {
       const item = getItem(el);
       if (!item) return;
       
-      if (selection) selection.toggle(item);
+      if (select) select(item);
     }
 
     return {      
@@ -99,7 +99,6 @@ export default {
       loading,
       table,
       size,
-      ...selection,
       ...sorting,
     };
   }
