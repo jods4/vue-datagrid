@@ -78,14 +78,14 @@
 }
 
 .dg-sort-count {
-  font-weight: normal;
-  margin-right: 0.5ch;
+  font-weight: normal;  
 }
 
-.dg-icon {
+.dg-sort-icon {
   fill: currentColor;
   height: .83em;
   width: .83em;
+  margin-left: 0.5ch;
 }
 
 .dg-selectable .dg-row {
