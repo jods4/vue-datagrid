@@ -39,17 +39,24 @@
   cursor: pointer;
 }
 
-.dg-sort:active {
-  background: #e0e0e0;
+.dg-sort:hover {
+  background: #e0f4ff;
 }
 
-.dg-resizer {
+.dg-sort:active {
+  background: #cbeafa;
+}
+
+.dg-resizer, .dg-separator {
   position: absolute;
   right: 0;
   top: 5px;
   height: calc(100% - 10px);
   border-right: solid 1px #d9e0e4;
   padding-right: 4px;
+}
+
+.dg-resizer {
   cursor: col-resize;
 }
 
@@ -83,6 +90,10 @@
 
 .dg-selectable .dg-row {
   cursor: pointer;
+}
+
+.dg-selectable .dg-row:active {
+  background: #cbeafa !important;
 }
 
 .dg-row.dg-selected {

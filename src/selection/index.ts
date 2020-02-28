@@ -1,4 +1,5 @@
-import { computed, Ref, watch, ObjectDirective } from "vue";
+import { computed, Ref, watch, h } from "vue";
+import { Column } from '../columns';
 
 export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
   if (!selected) return null;
@@ -7,11 +8,9 @@ export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
   watch(data, () => selected.clear());
 
   return {
-    toggle(el: HTMLElement) {
-      let item: object | undefined = el.closest('.dg-row')?.['_item'];
-      if (!item) return;
+    toggle(item: object) {
       if (!selected.delete(item))
-        selected.add(item);      
+        selected.add(item);
     },
 
     allSelected: computed({ 
@@ -29,8 +28,13 @@ export function useSelection(data: Ref<object[]>, selected?: Set<object>) {
   };
 }
 
-export const ItemDirective: ObjectDirective<HTMLElement> = {
-  mounted(el, binding) {
-    el['_item'] = binding.value; 
-  }
-};
+export function addSelection(columns: Column[], selected: Set<object> | undefined) {
+  if (!selected) return;
+
+  columns.unshift({ 
+    resizable: false,
+    sortable: false, 
+    defaultWidth: '',
+    render: (childProps: any) => h('input', { type: 'checkbox', checked: selected.has(childProps.data) }) 
+  });
+}

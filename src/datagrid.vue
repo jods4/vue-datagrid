@@ -1,45 +1,46 @@
 <template>
-<div class='dg-wrapper'>  
-  <virt-scroller class='dg-scroller' v-resize='size'>
-    <table ref='table' class='dg' :class='selected && "dg-selectable"'>
-      <thead>
-        <tr>
-          <th v-for='(c, i) of columns' 
-              :key='i'
-              class='dg-header' :class='[c.css, { "dg-sort": c.sortable !== false }]'
-              :style='{ width: c.width }'
-              @click='sortOn(c, $event.ctrlKey)'>
-            {{ c.label }}
-            <sort-indicator :sort='sort' :column='c' />
-            <b class='dg-resizer' @pointerdown="beginResize(c, $event)" @click.stop></b>
-          </th>
-        </tr>
-        <tr v-if='loading' class='dg-loader'></tr>
-      </thead>
-      <virt-body @click='toggle($event.target)' v-slot='{ items }'>
-        <tr v-for='d of items()' :key='d.id' v-item='d'
-            class='dg-row' :class='selected && selected.has(d) && "dg-selected"'>
-          <td v-for='(c,i) of columns' :key='i' class='dg-cell' :class='c.css'>
-            <component :is='c.render' :data='d' />
-          </td>
-        </tr>
-      </virt-body>
-    </table>
-  </virt-scroller>
-</div>
+  <div class='dg-wrapper'>  
+    <virt-scroller class='dg-scroller' v-resize='size'>
+      <table ref='table' class='dg' :class='$props.selected && "dg-selectable"'>
+        <thead>
+          <tr>
+            <th v-for='(c, i) of columns' 
+                :key='i'
+                class='dg-header' :class='[c.css, { "dg-sort": c.sortable !== false }]'
+                :style='{ width: c.width }'
+                @click='sortOn(c, $event.ctrlKey)'>
+              {{ c.label }}
+              <sort-indicator :sort='sort' :column='c' />
+              <col-resizer :column='c' />
+            </th>
+          </tr>
+          <tr v-if='loading' class='dg-loader'></tr>
+        </thead>
+        <virt-body @click='clicked($event.target)' v-slot='{ items }'>
+          <tr v-for='d of items()' :key='d.id' v-item='d'
+              class='dg-row' :class='$props.selected && $props.selected.has(d) && "dg-selected"'>
+            <td v-for='(c,i) of columns' :key='i' class='dg-cell' :class='c.css'>
+              <component :is='c.render' :data='d' />
+            </td>
+          </tr>
+        </virt-body>
+      </table>
+    </virt-scroller>
+  </div>
 </template>
 
 <script lang="ts">
-import { h, reactive, shallowRef as sref, watchEffect, onMounted, shallowReactive } from 'vue';
-import { Column } from "./columns/column";
-import { autoSize } from "./columns/autosize";
-import ResizeDirective from "./resize";
-import { useSelection, ItemDirective } from "./selection";
-import { useSorting, SortIndicator } from "./sort/index";
-import { useVirtual, VirtualBody, VirtualScroller } from "./virtual/index";
+import { reactive, shallowRef as sref, watchEffect, onMounted, shallowReactive } from 'vue';
+import { addFiller, autoSize, Column, ColumnDefinition, ColResizer } from './columns';
+import { ItemDirective, getItem } from './item';
+import ResizeDirective from './resize';
+import { addSelection, useSelection } from './selection';
+import { useSorting, SortIndicator } from './sort';
+import { useVirtual, VirtualBody, VirtualScroller } from './virtual';
 
 export default {
   components: {
+    'col-resizer': ColResizer,
     'sort-indicator': SortIndicator,
     'virt-body': VirtualBody,
     'virt-scroller': VirtualScroller,
@@ -56,7 +57,7 @@ export default {
     selected: Set,
   },
 
-  setup(props: { columns?: Column[], data?: object[] | Promise<object[]>, selected?: Set<object> }) {
+  setup(props: { columns?: ColumnDefinition[], data?: object[] | Promise<object[]>, selected?: Set<object> }) {
     const loading = sref(true);
     const data = sref([] as object[]);
     const table = sref();
@@ -65,24 +66,16 @@ export default {
     const sorting = useSorting(data);
     const { scrollToTop } = useVirtual(sorting.data, size);
     
-    const filler = reactive({ sortable: false, render: () => '', width: '' });
-    const columns = reactive([...props.columns!.map(c => ({ render: (childProps: any) => childProps.data[c.data!] + "", ...c, defaultWidth: c.width })), 
-                              filler]);
-    if (props.selected)
-      columns.unshift({ 
-        sortable: false, 
-        defaultWidth: '',
-        render: (childProps: any) => h('input', { type: 'checkbox', checked: props.selected!.has(childProps.data) }) 
-      });
+    const columns: Column[] = reactive(props.columns!.map(c => ({ 
+      render: (childProps: any) => childProps.data[c.data!] + "", 
+      ...c, 
+      defaultWidth: c.width 
+    })));
+
+    addSelection(columns, props.selected);
+    addFiller(columns, size);
+
     let autosized = false;
-    
-    onMounted(() => watchEffect(() => {
-      const total = columns.reduce((sum, col) => {
-        const width = parseInt(col['width']!, 10);        
-        return isNaN(width) || col === filler ? sum : sum + width;
-      }, 0);
-      filler.width = (size.width - total) + "px";
-    }));
 
     onMounted(() => watchEffect(async () => {
       loading.value = true;
@@ -90,25 +83,22 @@ export default {
       loading.value = false;
       scrollToTop();
       if (!autosized && rawData.length > 0)
-        autoSize(table.value, columns as { width?: string }[]);
+        autoSize(table.value, columns);
     }));
-
-    function beginResize(column: { width: string }, 
-                         { target, x: x0, pointerId }: PointerEvent & { target: HTMLElement }) {
-      const baseWidth = parseInt(column.width, 10);
-      const moveHandler = (event: PointerEvent) => column.width = Math.max(baseWidth + event.x - x0, 40) + "px";
-      target.setPointerCapture(pointerId)
-      target.addEventListener('pointermove', moveHandler);
-      target.addEventListener('pointerup', event => target.removeEventListener('pointermove', moveHandler), { once: true });
+    
+    function clicked(el: Element) {
+      const item = getItem(el);
+      if (!item) return;
+      
+      if (selection) selection.toggle(item);
     }
 
     return {      
+      clicked,
       columns,
       loading,
       table,
       size,
-      beginResize,
-      selected: props.selected,
       ...selection,
       ...sorting,
     };

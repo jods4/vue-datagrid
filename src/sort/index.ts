@@ -1,10 +1,10 @@
 import { computed, Ref, shallowReactive } from "vue";
-import { Column } from "../columns/column";
+import { ColumnDefinition } from "../columns/column";
 
 export { default as SortIndicator } from "./sort-indicator";
 
 export function useSorting(data: Ref<object[]>) {
-  const sort = shallowReactive([] as { column: Column, asc: number }[]);
+  const sort = shallowReactive([] as { column: ColumnDefinition, asc: number }[]);
 
   return {
     sort, 
@@ -24,7 +24,7 @@ export function useSorting(data: Ref<object[]>) {
       return Array.from(data.value).sort(comparer);
     }),
 
-    sortOn(column: Column, multi: boolean) {
+    sortOn(column: ColumnDefinition, multi: boolean) {
       if (column.sortable === false) return;
 
       let i = sort.findIndex(x => x.column === column);        
