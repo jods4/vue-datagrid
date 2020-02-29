@@ -1,7 +1,7 @@
 <template>
 <h2 style='margin: 0'>Pokedex</h2>
 <div style='margin: 12px 0'>
-  <button @click='fetch'>Load data (for 2s)</button>
+  <button @click='fetch'>Load data (1.5s)</button>
   Selected count: {{ selected.size }}
   <button @click='selected.clear()'>Clear selection</button>
 </div>
@@ -12,7 +12,6 @@
 
 <script lang="ts">
 import { markNonReactive, ref, shallowReactive } from "vue";
-import data from './pokedex';
 
 export default {
   setup() {
@@ -27,9 +26,9 @@ export default {
       data: ref<any>([]),
 
       fetch() {
-        state.data.value = new Promise(resolve => { 
-          setTimeout(() => resolve(markNonReactive([...data])), 2000);
-        });
+        state.data.value = new Promise(resolve => setTimeout(resolve, 1500))
+          .then(() => import(/* webpackChunkName: "pokedex" */ './pokedex'))
+          .then(({ default: data }) => markNonReactive([...data]));
       },
 
       selected: shallowReactive(new Set()),

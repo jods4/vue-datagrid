@@ -8,6 +8,7 @@ module.exports = (env = {}) => ({
 
   output: {
     path: resolve(__dirname, './dist'),
+    publicPath: '/dist/',
   },
 
   resolve: {
