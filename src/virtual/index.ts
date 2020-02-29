@@ -10,7 +10,7 @@ export function useVirtual(data: Val<object[]>, size: { height: number }) {
   const state: VirtualState = shallowReactive({
     scroller: <any>null!, // initialized on mount // FIXME: TS error if declared as Element?
     scrollTop: 0,
-    rowHeight: 24,
+    rowHeight: 25,
     buffer: 4,
     topGap: 0,
     bottomGap: 0,
@@ -26,6 +26,9 @@ export function useVirtual(data: Val<object[]>, size: { height: number }) {
   });
 
   watchEffect(() => {
+    // Technically, size.height is slighty too high because it's the height of the full table, 
+    // including thead, rather than just tbody.
+    // That's not an issue though, it just means one or two extra rows will be rendered past the bottom.
     const length = unref(data).length;
     const { buffer, rowHeight, scrollTop } = state;
     const index = state.index = Math.max((scrollTop / rowHeight | 0) - buffer, 0);

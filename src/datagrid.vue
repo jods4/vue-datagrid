@@ -1,7 +1,19 @@
 <template>
   <div class='dg-wrapper'>  
     <virt-scroller class='dg-scroller' v-resize='size'>
-      <table ref='table' class='dg' :class='$props.selected && "dg-selectable"'>
+      <table ref='table' class='dg' :class='$props.selected && "dg-selectable"'>        
+        <virt-body v-slot='{ items }'>
+          <anim-body @click='clicked($event.target)' :data='data'>
+            <tr v-for='d of items()' :key='d.id' v-item='d'
+                class='dg-row' :class='$props.selected && $props.selected.has(d) && "dg-selected"'>
+              <td v-for='(c,i) of columns' :key='i' class='dg-cell' :class='c.css'>
+                <component :is='c.render' :data='d' />
+              </td>
+            </tr>
+          </anim-body>
+        </virt-body>
+        <!-- HACK: thead at the end is ugly, but required to have sticky headers on top of tr that 
+                   have their own stacking context, e.g. when using opacity or transform. -->
         <thead>
           <tr>
             <th v-for='(c, i) of columns' 
@@ -16,14 +28,6 @@
           </tr>
           <tr v-if='loading' class='dg-loader'></tr>
         </thead>
-        <virt-body @click='clicked($event.target)' v-slot='{ items }'>
-          <tr v-for='d of items()' :key='d.id' v-item='d'
-              class='dg-row' :class='$props.selected && $props.selected.has(d) && "dg-selected"'>
-            <td v-for='(c,i) of columns' :key='i' class='dg-cell' :class='c.css'>
-              <component :is='c.render' :data='d' />
-            </td>
-          </tr>
-        </virt-body>
       </table>
     </virt-scroller>
   </div>
@@ -31,6 +35,7 @@
 
 <script lang="ts">
 import { reactive, shallowRef as sref, watchEffect, onMounted, shallowReactive } from 'vue';
+import { AnimBody } from "./animation";
 import { addFiller, autoSize, Column, ColumnDefinition, ColResizer } from './columns';
 import { ItemDirective, getItem } from './item';
 import ResizeDirective from './resize';
@@ -40,6 +45,7 @@ import { useVirtual, VirtualBody, VirtualScroller } from './virtual';
 
 export default {
   components: {
+    'anim-body': AnimBody,
     'col-resizer': ColResizer,
     'sort-indicator': SortIndicator,
     'virt-body': VirtualBody,
@@ -82,7 +88,7 @@ export default {
       let rawData = data.value = await props.data!;
       loading.value = false;
       scrollToTop();
-      if (!autosized && rawData.length > 0)
+      if (!autosized && rawData.length)
         autoSize(table.value, columns);
     }));
     

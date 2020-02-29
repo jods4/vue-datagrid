@@ -22,7 +22,7 @@ export function useSorting(data: Ref<object[]>) {
         }
         return 0;
       };
-      return Array.from(data.value).sort(comparer);
+      return [...data.value].sort(comparer);
     }),
 
     sortOn(column: ColumnDefinition, multi: boolean) {

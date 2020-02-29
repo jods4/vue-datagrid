@@ -1,8 +1,10 @@
 <template>
-  <tbody v-bind='$attrs'>
+  <tbody>
     <tr :style='{ height: topGap + "px" }' />
     <tr v-if='(index & 1) === 0' />
-    <slot :items="items" />
+  </tbody>
+  <slot :items="items" />
+  <tbody>
     <tr :style='{ height: bottomGap + "px" }' />
   </tbody>
 </template>

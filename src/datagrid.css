@@ -69,6 +69,10 @@
   text-align: right;
 }
 
+.dg-row {
+  background: #fff;
+}
+
 .dg-row:nth-child(even) {
   background: #fcfdfe;
 }
@@ -96,7 +100,7 @@
   background: #cbeafa !important;
 }
 
-.dg-row.dg-selected {
+.dg-selected.dg-row {
   background: #daf1ff;
 }
 
@@ -120,4 +124,24 @@
   background-position: -25% 0; 
   background-size: 20%; 
   animation: dg-loader 1.5s ease-in-out infinite;
+}
+
+.dg-row{
+  background: #fff;
+}
+
+.dg-enter-active {
+  transition: opacity 0.3s;
+}
+
+.dg-enter-from {
+  opacity: 0;
+}
+
+.dg-leave-active {
+  display: none;
+}
+
+.dg-move {
+  transition: transform 1s;
 }
