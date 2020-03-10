@@ -11,10 +11,11 @@
 
 <script lang="ts">
 import { getState } from "./state";
+import { view } from '../reactivity/view';
 
 export default {
   setup() {
-    return getState();
+    return view(getState());
   }
 }
 </script>

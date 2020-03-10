@@ -21,14 +21,16 @@ export function addSelection(columns: Column[], data: Ref<object[]>, selected: S
   });
 
   columns.unshift({ 
+    key: 'select',
     resizable: false,
     sortable: false, 
-    defaultWidth: '',
+    defaultWidth: 0,
+    width: 0,
     header: () => h('input', { 
       type: 'checkbox', 
       checked: allSelected.value, 
       indeterminate: allSelected.value === null,
-      onClick(e: Event) { 
+      onclick(e: Event) { 
         if ((e.target as HTMLInputElement).checked)
           data.value.forEach(selected.add, selected);
         else

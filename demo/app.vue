@@ -1,7 +1,7 @@
 <template>
 <h2 style='margin: 0'>Pokedex</h2>
 <div style='margin: 12px 0'>
-  <button @click='fetch'>Load data (1.5s)</button>
+  <button @click='fetch(1500)'>Load data (1.5s)</button>
   Selected count: {{ selected.size }}
   <button @click='selected.clear()'>Clear selection</button>
 </div>
@@ -19,14 +19,14 @@ export default {
       columns: [ 
         { label: 'Id', data: 'id' },
         { label: 'Name', data: 'name' },
-        { label: 'Height', data: 'height', css: 'dg-right', sortable: false, width: '100px' },
-        { label: 'Weight', data: 'weight', css: 'dg-right', sortable: false, width: '100px' },
-        { label: 'Spawn chance', data: 'spawn_chance', right: true, width: '100px' },
+        { label: 'Height', data: 'height', css: 'dg-right', sortable: false, width: 100 },
+        { label: 'Weight', data: 'weight', css: 'dg-right', sortable: false, width: 100 },
+        { label: 'Spawn chance', data: 'spawn_chance', right: true, width: 100 },
       ],
       data: ref<any>([]),
 
-      fetch() {
-        state.data.value = new Promise(resolve => setTimeout(resolve, 1500))
+      fetch(delay: number) {
+        state.data.value = new Promise(resolve => setTimeout(resolve, delay)) 
           .then(() => import(/* webpackChunkName: "pokedex" */ './pokedex'))
           .then(({ default: data }) => markNonReactive([...data]));
       },
@@ -34,7 +34,7 @@ export default {
       selected: shallowReactive(new Set()),
     };
 
-    state.fetch();
+    state.fetch(0);
 
     return state;
   }

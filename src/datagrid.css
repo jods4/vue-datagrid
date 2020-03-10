@@ -13,7 +13,6 @@
   border-spacing: 0;
   table-layout: fixed;
   empty-cells: show;  
-  /*width: 100%;*/
 }
 
 .dg-header, .dg-cell {
@@ -26,13 +25,25 @@
 .dg-header {
   padding: 4px 12px;
   background: #f5f7f7;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(0, 0, 0, 0.6);
   font-weight: 600;  
   border-bottom: solid 1px #bdc3c7;
   position: sticky;
+  z-index: 1;
   top: 0;
   text-align: left;
   user-select: none;
+}
+
+.dg-header-dragged {
+  z-index: 2;
+  background: #cbeafa !important;
+}
+
+.dg-header-back {
+  position: absolute; 
+  z-index: 0;
+  background: #e2e1df;
 }
 
 .dg-sort {
@@ -74,7 +85,7 @@
 }
 
 .dg-row:nth-child(even) {
-  background: #fcfdfe;
+  background: #f7f5f3;
 }
 
 .dg-row:hover {
@@ -109,13 +120,8 @@
   100% { background-position: 125% 0; }
 }
 
-.dg-loader {
-  height: 0; 
-}
-
-.dg-loader::after
+.dg-loader
 {
-  content: '';
   position: absolute; 
   background: linear-gradient(to right, #64bff0, #64bff0) repeat-y; 
   height: 2px;
@@ -124,24 +130,4 @@
   background-position: -25% 0; 
   background-size: 20%; 
   animation: dg-loader 1.5s ease-in-out infinite;
-}
-
-.dg-row{
-  background: #fff;
-}
-
-.dg-enter-active {
-  transition: opacity 0.3s;
-}
-
-.dg-enter-from {
-  opacity: 0;
-}
-
-.dg-leave-active {
-  display: none;
-}
-
-.dg-move {
-  transition: transform 1s;
 }

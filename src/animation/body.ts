@@ -1,7 +1,7 @@
 import { h, defineComponent, Fragment, VNode, onUpdated, watch } from 'vue';
-import { fade, move } from './animations';
+import { fade, moveY } from './animations';
 
-export const AnimBody = defineComponent({  
+export const AnimBody = defineComponent({
   props: {
     data: Array,
   },
@@ -43,7 +43,7 @@ export const AnimBody = defineComponent({
       let delay = 0;
       moves.sort((a, b) => a.y0 - b.y0); // top-down animation looks nicer
       for (const m of moves) {
-        move(m.el, m.dist, delay);
+        moveY(m.el, m.dist, delay);
         delay += 10;
       }      
       if (moves.length) 

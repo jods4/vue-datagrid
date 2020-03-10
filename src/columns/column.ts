@@ -8,9 +8,16 @@ export interface ColumnDefinition {
   render?: FunctionalComponent;
   resizable?: boolean;
   sortable?: boolean;
-  width?: string;
+  width?: number;
 };
 
 export interface Column extends ColumnDefinition {
-  defaultWidth?: string;
+  key: string;
+  defaultWidth?: number;
+  width: number;
+  offsetX?: number;
+  animationX?: Animation;
+  deltaX?: number;
+  animate?(el: HTMLElement): void;
+  dragged?: boolean;
 }

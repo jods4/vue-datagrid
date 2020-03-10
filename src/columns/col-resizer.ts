@@ -10,9 +10,11 @@ export default function render(props: { column?: Column }) {
       
       onClick(event: Event) { event.stopPropagation(); },
         
-      onPointerdown({ target, x, pointerId }: PointerEvent & { target: HTMLElement }) {
-        const baseWidth = parseInt(column.width!, 10);
-        const moveHandler = (event: PointerEvent) => column.width = Math.max(baseWidth + event.x - x, 40) + "px";
+      onPointerdown(event: PointerEvent & { target: HTMLElement }) {
+        event.stopPropagation();
+        const { target, x, pointerId } = event;
+        const baseWidth = column.width;
+        const moveHandler = (event: PointerEvent) => column.width = Math.max(baseWidth + event.x - x, 40);
         target.setPointerCapture(pointerId)
         target.addEventListener('pointermove', moveHandler);
         target.addEventListener('pointerup', () => target.removeEventListener('pointermove', moveHandler), { once: true });
