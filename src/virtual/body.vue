@@ -3,7 +3,7 @@
     <tr :style='{ height: topGap + "px" }' />
     <tr v-if='(index & 1) === 0' />
   </tbody>
-  <slot :items="items" />
+  <slot :items='items' />
   <tbody>
     <tr :style='{ height: bottomGap + "px" }' />
   </tbody>

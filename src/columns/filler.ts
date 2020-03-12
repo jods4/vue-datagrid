@@ -2,7 +2,14 @@ import { shallowReactive as sreactive, onMounted, watchEffect } from 'vue';
 import { Column } from './column';
 
 export function addFiller(columns: Column[], size: { width: number }) {
-  const filler = sreactive({ key: 'fill', sortable: false, header: () => '', render: () => '', width: 0 });
+  const filler = sreactive({ 
+    key: 'fill', 
+    sortable: false, 
+    searchable: false, 
+    header: () => '', 
+    render: () => '', 
+    width: 0 
+  });
   
   columns.push(filler);
 

@@ -7,8 +7,6 @@ export interface VirtualState {
   buffer: number;
   topGap: number;
   bottomGap: number;
-  index: number;
-  count: number;
 
   items: () => Iterator<object>;
 }

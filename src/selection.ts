@@ -1,5 +1,5 @@
-import { computed, Ref, watch, h } from "vue";
-import { Column } from '../columns';
+import { computed, Ref, watch, h } from 'vue';
+import { Column } from './columns';
 
 export function addSelection(columns: Column[], data: Ref<object[]>, selected: Set<object> | undefined) {
   if (!selected) return null;
@@ -24,6 +24,7 @@ export function addSelection(columns: Column[], data: Ref<object[]>, selected: S
     key: 'select',
     resizable: false,
     sortable: false, 
+    searchable: false,
     defaultWidth: 0,
     width: 0,
     header: () => h('input', { 

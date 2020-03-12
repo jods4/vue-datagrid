@@ -1,6 +1,6 @@
 import { ObjectDirective } from "vue";
 
-export default <ObjectDirective>{
+export const ResizeDirective = <ObjectDirective>{
   beforeMount(el, binding) {
     const size = binding.value as { width: number; height: number };
     const observer = new ResizeObserver(entries => {

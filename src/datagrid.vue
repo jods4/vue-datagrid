@@ -45,7 +45,8 @@ import { onMounted, reactive, shallowReactive, shallowRef as sref, watchEffect, 
 import { AnimBody, AnimColumn, useAnimations } from "./animation";
 import { addFiller, autoSize, Column, ColumnDefinition, ColResizer } from './columns';
 import { ItemDirective, getItem } from './item';
-import ResizeDirective from './resize';
+import { ResizeDirective } from './resize';
+import { useSearching } from './search';
 import { addSelection } from './selection';
 import { useSorting, SortIndicator } from './sort';
 import { Ctor, view } from './utils';
@@ -70,6 +71,7 @@ export default defineComponent({
     columns: { type: Array as Ctor<ColumnDefinition[]>, required: true },
     data: [Array as Ctor<object[]>, Promise as Ctor<Promise<object[]>>],
     selected: Set as Ctor<Set<object>>,
+    search: String,
   },
 
   setup(props) {
@@ -79,10 +81,10 @@ export default defineComponent({
     const table = sref();
     const size = shallowReactive({ width: 0, height: 0 });
     const headerSize = shallowReactive({ width: 0, height: 0 });
-    const sorting = useSorting(data);
+    const sorting = useSorting(useSearching(data, props));
     const { scrollToTop } = useVirtual(sorting.data, size);
     
-    const columns: Column[] = reactive(props.columns!.map((c, i) => ({
+    const columns: Column[] = reactive(props.columns.map((c, i) => ({
       header: (childProps: any) => c.label + "",
       render: (childProps: any) => childProps.data[c.data!] + "",      
       width: 0,
@@ -97,6 +99,7 @@ export default defineComponent({
     const headerPointerDown = useAnimations(columns, autoSized);
 
     onMounted(() => watchEffect(async () => {
+      // TODO: empty grid because of no props.data or await data == []
       loading.value = true;
       data.value = await props.data!;
       loading.value = false;
