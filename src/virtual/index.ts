@@ -14,6 +14,7 @@ export function useVirtual(data: Val<object[]>, size: { height: number }) {
     buffer: 4,
     topGap: 0,
     bottomGap: 0,
+    index: 0,
 
     items: computed(() => {
       // Technically, size.height is slighty too high because it's the height of the full table, 
@@ -21,7 +22,7 @@ export function useVirtual(data: Val<object[]>, size: { height: number }) {
       // That's not an issue though, it just means one or two extra rows will be rendered past the bottom.
       const length = unref(data).length;
       const { buffer, rowHeight, scrollTop } = state;
-      const index = Math.max((scrollTop / rowHeight | 0) - buffer, 0);
+      const index = state.index = Math.max((scrollTop / rowHeight | 0) - buffer, 0);
       const count = Math.min((size.height / rowHeight | 0) + 1 + buffer + buffer, length - index);
       state.topGap = index * rowHeight;
       state.bottomGap = (length - count - index) * rowHeight;
