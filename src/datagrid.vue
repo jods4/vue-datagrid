@@ -41,17 +41,17 @@
 </template>
 
 <script lang="ts">
-import { onMounted, reactive, shallowReactive, shallowRef as sref, watchEffect } from 'vue';
+import { onMounted, reactive, shallowReactive, shallowRef as sref, watchEffect, defineComponent } from 'vue';
 import { AnimBody, AnimColumn, useAnimations } from "./animation";
 import { addFiller, autoSize, Column, ColumnDefinition, ColResizer } from './columns';
 import { ItemDirective, getItem } from './item';
-import { view } from "./reactivity/view";
 import ResizeDirective from './resize';
 import { addSelection } from './selection';
 import { useSorting, SortIndicator } from './sort';
+import { Ctor, view } from './utils';
 import { useVirtual, VirtualBody, VirtualScroller } from './virtual';
 
-export default {
+export default defineComponent({
   components: {
     'anim-body': AnimBody,
     'col-resizer': ColResizer,
@@ -67,12 +67,12 @@ export default {
   },
 
   props: {
-    columns: Array,
-    data: [Array, Promise],
-    selected: Set,
+    columns: { type: Array as Ctor<ColumnDefinition[]>, required: true },
+    data: [Array as Ctor<object[]>, Promise as Ctor<Promise<object[]>>],
+    selected: Set as Ctor<Set<object>>,
   },
 
-  setup(props: { columns?: ColumnDefinition[], data?: object[] | Promise<object[]>, selected?: Set<object> }) {
+  setup(props) {
     const autoSized = sref(false);
     const loading = sref(true);
     const data = sref([] as object[]);
@@ -122,7 +122,7 @@ export default {
       ...sorting,
     });
   }
-};
+});
 </script>
 
 <style src='./datagrid.css'></style>

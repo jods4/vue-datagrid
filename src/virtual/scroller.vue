@@ -7,7 +7,7 @@
 <script lang='ts'>
 import { shallowRef as sref, onMounted } from 'vue';
 import { getState } from './state';
-import { view } from '../reactivity/view';
+import { view } from '../utils';
 
 export default {
   setup() {

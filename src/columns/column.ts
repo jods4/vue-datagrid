@@ -8,6 +8,7 @@ export interface ColumnDefinition {
   render?: FunctionalComponent;
   resizable?: boolean;
   sortable?: boolean;
+  searchable?: boolean;
   width?: number;
 };
 

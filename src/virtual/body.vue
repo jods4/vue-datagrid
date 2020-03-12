@@ -10,8 +10,8 @@
 </template>
 
 <script lang="ts">
-import { getState } from "./state";
-import { view } from '../reactivity/view';
+import { getState } from './state';
+import { view } from '../utils';
 
 export default {
   setup() {
