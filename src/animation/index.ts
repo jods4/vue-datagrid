@@ -43,8 +43,15 @@ export function useAnimations(columns: Column[], autoSized: Ref<boolean>) {
     resetTracking();
   });
 
-  return function headerPointerDown({ currentTarget: th, x, pointerId }: PointerEvent & { currentTarget: HTMLElement }, column: Column) {
+  // Note that it's possible to skip pointerup events in some edge cases (at least happens in Chromium 82).
+  // Examples include stressing the thing like a madman (not sure what triggers the bug then)
+  // or judicious use of Alt-Tab when dragging.
+  return function headerPointerDown({ currentTarget: th, x: x0, button }: PointerEvent & { currentTarget: HTMLElement }, column: Column) {
+    if (button !== 0) return;
+
     let i = columns.indexOf(column);
+    // We missed a pointerup but nevermind, the old listeners are still in place
+    if (column.dragged) return;
 
     function thresholds() {
       return [
@@ -54,53 +61,72 @@ export function useAnimations(columns: Column[], autoSized: Ref<boolean>) {
     }
 
     let [left, right] = thresholds();
-    let translateX: CSSUnitValue;    
+    let translateX: CSSUnitValue;
     let transform: CSSTransformValue;
 
-    const preventClick = (e: Event) => e.stopImmediatePropagation();
+    const listeners = {
+      handleEvent(e: PointerEvent) {
+        switch (e.type) {
+          case 'click': 
+            e.stopImmediatePropagation();
+            break;
+          case 'pointermove':
+            this.move(e);
+            break;
+          case 'pointerup':
+            if (e.button === 0)
+              this.up();
+            break;
+        }
+      },
 
-    const moveHandler = (event: PointerEvent) => {
-      let delta = event.x - x;      
-      
-      // start dragging after a significant amount of movement
-      if (!column.dragged) {
-        if (Math.abs(delta) < 4) return;
-        column.dragged = true;
-        window.addEventListener('click', preventClick, { once: true, capture: true })
-        transform = new CSSTransformValue([ new CSSTranslate(translateX = CSS.px(0), CSS.px(0)) ]);        
-      }
+      move({ x, buttons }: PointerEvent) {
+        let delta = x - x0;      
+        
+        // start dragging after a significant amount of movement
+        if (!column.dragged) {
+          if (Math.abs(delta) < 4) return;
+          column.dragged = true;
+          window.addEventListener('click', this, { once: true, capture: true })
+          transform = new CSSTransformValue([ new CSSTranslate(translateX = CSS.px(0), CSS.px(0)) ]);        
+        } 
+        else if ((buttons & 1) === 0) {
+          // button was released without us noticing. This is bad :(
+          this.up();
+          return;
+        }
 
-      // swap columns if required
-      if (delta < left) {
-        const other = columns[--i];
-        x -= other.width;
-        columns.splice(i, 2, column, other);
-        delta = event.x - x;
-        [left, right] = thresholds();
-      }
-      else if (delta > right) {
-        const other = columns[++i];
-        x += other.width;
-        columns.splice(i - 1, 2, other, column);
-        delta = event.x - x;
-        [left, right] = thresholds();
-      }
+        // swap columns if required
+        if (delta < left) {
+          const other = columns[--i];
+          x0 -= other.width;
+          delta = x - x0;
+          columns.splice(i, 2, column, other);
+          [left, right] = thresholds();
+        }
+        else if (delta > right) {
+          const other = columns[++i];
+          x0 += other.width;
+          delta = x - x0;
+          columns.splice(i - 1, 2, other, column);
+          [left, right] = thresholds();
+        }
 
-      translateX.value = delta;
-      th.attributeStyleMap.set('transform', transform);
+        translateX.value = delta;
+        th.attributeStyleMap.set('transform', transform);
+      },
+
+      up() {
+        ['pointermove', 'pointerup']
+          .forEach(name => window.removeEventListener(name, this, true));
+        if (!column.dragged) return;
+        column.dragged = false;
+        th.attributeStyleMap.delete('transform');
+        setTimeout(() => window.removeEventListener('click', this, true), 0);
+      }
     };
 
-    window.addEventListener('pointermove', moveHandler, true);
-
-    window.addEventListener('pointerup', () => {
-      window.removeEventListener('pointermove', moveHandler, true);
-      if (!column.dragged) return;
-      column.dragged = false;
-      th.attributeStyleMap.delete('transform');
-      setTimeout(() => window.removeEventListener('click', preventClick, true), 0);
-    }, { 
-      once: true, 
-      capture: true 
-    });
+    ['pointermove', 'pointerup']
+      .forEach(name => window.addEventListener(name, listeners, true));
   }
 }
